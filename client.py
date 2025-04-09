@@ -1,18 +1,37 @@
 import socket
+import threading
+
+def receive_messages(client_socket):
+    while True:
+        try:
+            data = client_socket.recv(1024)
+            if not data:
+                print("Connection closed")
+                break
+            print(f"\nServer: {data.decode()}")
+        except:
+            print("Error receiving data from server")
+            break
+
+
 
 def start_client():
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect(("192.168.1.7", 12345))
+    client_socket.connect(("127.0.0.1", 12345))
 
-# Receive the message from the server (it’s usually a good idea to set a buffer size)
-    data = client_socket.recv(1024)
+    receive_thread = threading.Thread(target=receive_messages, args=(client_socket,))
+    receive_thread.daemon = True  # Optional: ends when main thread ends
+    receive_thread.start()
 
-# Print the message from the server
-    print(f"Received from server: {data.decode()}")
+    while True:
+        messages = input("You: ")
+        if messages.lower() == "exit":
+            print("Closing connection")
+            client_socket.close()
+            break
+        client_socket.send(messages.encode())
 
-# Close the client connection
-    client_socket.close()
 
 # This ensures the client only runs when this script is executed directly
 if __name__ == "__main__":

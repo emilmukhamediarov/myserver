@@ -25,7 +25,7 @@ def start_client():
     receive_thread.start()
 
     while True:
-        messages = input("You: ")
+        messages = input("")
         if messages.lower() == "exit":
             print("Closing connection")
             client_socket.close()

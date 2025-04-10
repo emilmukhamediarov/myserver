@@ -1,14 +1,14 @@
 import socket
 import threading
 
-def handle_client(client_socket, client_threads, thread_lock):
+def handle_client(client_socket, client_threads, thread_lock, client_address):
     """Handle a client connection"""
     try:
         while True: # Keep connection alive for multiple messages
             message = client_socket.recv(1024)
             if not message: #Client disconnected
                 break
-            print(f"Received: {message.decode()}")
+            print(f"Received from {client_address}: {message.decode()}")
             reply = "Message received"
             client_socket.send(reply.encode())
     except ConnectionResetError:
@@ -42,7 +42,7 @@ def start_server():
                 print(f"Connection established with {client_address}!")
 
                 #Handle client in a new thread
-                client_thread = threading.Thread(target=handle_client, args=(client_socket, client_threads, thread_lock))
+                client_thread = threading.Thread(target=handle_client, args=(client_socket, client_threads, thread_lock, client_address))
                 with thread_lock: #I am using this now, others wait.
                     client_threads.append(client_thread)
                 # Lock is automatically released here
